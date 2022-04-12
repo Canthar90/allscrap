@@ -40,34 +40,42 @@ def search(search_word, search_number=1, by_pricve=False):
         action.key_up(Keys.ENTER)
         action.perform()
 
-    time.sleep(1)
+    time.sleep(2)
 
     main_titles = driver.find_elements(
-        By.XPATH,
-        """/html/body/div[2]/div[2]/div/div/div/div/div/div[3]/div[1]/div[5]/div/div/div[1]/div[2]/div/section[2]
-        /article[5]/div/div[2]/div[1]/h2/a"""
+        By.CSS_SELECTOR,
+        """div div div div div div div div div div div div div div div section article div div div h2 a"""
     )
-
+    #         """/html/body/div[2]/div[2]/div/div/div/div/div/div[3]/div[1]/div[5]/div/div/div[1]/div[2]/div/section[2]/article[1]/div/div[2]/div[1]/h2/a"""
     main_prices = driver.find_elements(
-        By.XPATH,
-        """/html/body/div[2]/div[2]/div/div/div/div/div/div[3]/div[1]/div[5]/div/div/div[1]/div[2]/div/section[2]
-        /article[4]/div/div[2]/div[2]/div/div/span"""
+        By.CSS_SELECTOR,
+        """div div div div div div div div div div div div div div div section article div div div div div span._1svub._lf05o"""
     )
+            # """/html/body/div[2]/div[2]/div/div/div/div/div/div[3]/div[1]/div[5]/div/div/div[1]/div[2]/div/section[1]/article[1]/div/div[2]/div[2]/div/div/span"""
+    # /html/body/div[2]/div[2]/div/div/div/div/div/div[3]/div[1]/div[5]/div/div/div[1]/div[2]/div/section[1]/article[2]/div/div[2]/div[2]/div/div/span
     print(len(main_titles))
+    print(len(main_prices))
     if len(main_titles) == 0:
-        print('Sory nie mogę znaleźć wyników dla tego zapytania')
+        return 'Sory nie mogę znaleźć wyników dla tego zapytania'
     else:
         message = ''
+        count = 0
+        for title in main_titles:
+            message += f""" Tytuł to  {main_titles[count].text}\n  Pierwsza cena to {main_prices[count].text}
+            link: {main_titles[count].get_attribute('href')} \n"""
+            count += 1
+            if count == int(search_number):
+                return message
 
-        print(f"pierwszy tytuł to  {main_titles[0].text}\n  Pierwsza cena to {main_prices[0].text}\n"
-            f"first link is {main_titles[0].get_attribute('href')}")
+        message += "Nie było wystarczająco dużo wyników wyszukiwania"
+        return message
 
 
 
 
 fraze = input("Plis input fraze to be searched in format: !asearch, searched_word (nessesary), \n"
               "number of results(optional) ,by_price(optional) True if you wanna to sort results by the cheapest \n"
-              "For example it should look like : !asearch, kopytko, 5, True")
+              "For example it should look like : !asearch, kopytko, 5, True: ")
 
 if '!asearch' in fraze:
     fraze = fraze.split(',')
@@ -79,11 +87,14 @@ if '!asearch' in fraze:
     driver = webdriver.Chrome(service=s, options=options)
     action = ActionChains(driver=driver)
     if len(fraze) == 2:
-        search(search_word=fraze[1])
+        message = search(search_word=fraze[1])
+        print(message)
     elif len(fraze) == 3:
-        search(search_word=fraze[1], search_number=fraze[2])
+        message = search(search_word=fraze[1], search_number=fraze[2])
+        print(message)
     elif len(fraze) == 4:
-        search(search_word=fraze[1], search_number=fraze[2], by_pricve=fraze[3])
+        message = search(search_word=fraze[1], search_number=fraze[2], by_pricve=fraze[3])
+        print(message)
 else:
     print("Prowidet statment is invalid")
 
