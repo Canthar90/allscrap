@@ -5,7 +5,13 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
+import json
 
+try:
+    with open("planned.json") as file:
+        planned = json.load(file)
+except:
+    planned = {}
 
 
 def search(search_word, search_number=1, by_pricve=False):
@@ -28,7 +34,7 @@ def search(search_word, search_number=1, by_pricve=False):
     action.key_up(Keys.ENTER)
     action.perform()
 
-    if by_pricve:
+    if by_pricve == 'True':
         time.sleep(1)
         sorting_selector = driver.find_element(
             By.XPATH, """/html/body/div[2]/div[2]/div/div/div/div/div/div[3]/div[1]/div[3]/div[3]/div/div/div/select""")
@@ -61,13 +67,15 @@ def search(search_word, search_number=1, by_pricve=False):
         message = ''
         count = 0
         for title in main_titles:
-            message += f""" Tytuł to  {main_titles[count].text}\n  Pierwsza cena to {main_prices[count].text}
-            link: {main_titles[count].get_attribute('href')} \n"""
+            message += f"""Tytuł to {main_titles[count].text}\nCena to {main_prices[count].text}\n"""
+            message += f"""link: {main_titles[count].get_attribute('href')} \n"""
             count += 1
             if count == int(search_number):
+                driver.quit()
                 return message
 
         message += "Nie było wystarczająco dużo wyników wyszukiwania"
+        driver.quit()
         return message
 
 
@@ -95,6 +103,29 @@ if '!asearch' in fraze:
     elif len(fraze) == 4:
         message = search(search_word=fraze[1], search_number=fraze[2], by_pricve=fraze[3])
         print(message)
+
+
+elif fraze == '!aplanned':
+    for key in planned:
+        if len(planned[key]) == 1:
+            pass
+    pass
+
+elif '!aplanned_add' in fraze:
+    fraze = fraze.split(',')
+    fraze = [element.strip() for element in fraze]
+    if len(fraze) == 2:
+        planned[fraze[1]] = ['1']
+        with open("planned.json", "w") as file:
+            json.dump(planned, file)
+    elif len(fraze) == 3:
+        planned[fraze[1]] = [fraze[2]]
+        with open("planned.json", "w") as file:
+            json.dump(planned, file)
+    elif len(fraze) == 4:
+        planned[fraze[1]] = [fraze[2], fraze[3]]
+        with open("planned.json", "w") as file:
+            json.dump(planned, file)
 else:
     print("Prowidet statment is invalid")
 
